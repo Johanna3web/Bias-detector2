@@ -1,4 +1,4 @@
-# PayEquity AI - Workplace Bias Detector
+# PayEquity AI - Workplace Bias Detector https://bias-detector2.vercel.app/
 
 A comprehensive web application for detecting and analyzing pay bias across different sectors, countries, and demographics using advanced analytics and AI-powered insights.
 
