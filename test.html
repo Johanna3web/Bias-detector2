@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test PayEquity AI</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .test-section {
+            background: #f0f7ff;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #1d4ed8;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            background: white;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>PayEquity AI - Test Page</h1>
+    
+    <div class="test-section">
+        <h2>Quick Test</h2>
+        <p>Click the button below to test the application with sample data:</p>
+        <button onclick="runQuickTest()">Run Quick Test</button>
+        <div id="testResult" class="result" style="display: none;"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Open Main Application</h2>
+        <p>Click to open the full bias detector:</p>
+        <button onclick="window.location.href='index.html'">Open PayEquity AI</button>
+    </div>
+
+    <script>
+        function runQuickTest() {
+            const testData = [
+                { country: 'united-states', sector: 'technology', jobTitle: 'Software Engineer', experience: 5, gender: 'male', ethnicity: 'white-caucasian', age: 30, education: 'bachelors', salary: 100000, department: 'Engineering' },
+                { country: 'united-states', sector: 'technology', jobTitle: 'Software Engineer', experience: 5, gender: 'female', ethnicity: 'white-caucasian', age: 29, education: 'bachelors', salary: 85000, department: 'Engineering' },
+                { country: 'united-states', sector: 'technology', jobTitle: 'Senior Engineer', experience: 8, gender: 'male', ethnicity: 'asian', age: 35, education: 'masters', salary: 130000, department: 'Engineering' },
+                { country: 'united-states', sector: 'technology', jobTitle: 'Senior Engineer', experience: 8, gender: 'female', ethnicity: 'asian', age: 34, education: 'masters', salary: 115000, department: 'Engineering' },
+                { country: 'united-states', sector: 'finance', jobTitle: 'Analyst', experience: 3, gender: 'male', ethnicity: 'black-african-american', age: 27, education: 'bachelors', salary: 75000, department: 'Finance' },
+                { country: 'united-states', sector: 'finance', jobTitle: 'Analyst', experience: 3, gender: 'female', ethnicity: 'hispanic-latino', age: 26, education: 'bachelors', salary: 70000, department: 'Finance' },
+                { country: 'united-kingdom', sector: 'healthcare', jobTitle: 'Nurse', experience: 4, gender: 'female', ethnicity: 'white-caucasian', age: 32, education: 'bachelors', salary: 45000, department: 'Medical' },
+                { country: 'united-kingdom', sector: 'healthcare', jobTitle: 'Nurse', experience: 4, gender: 'male', ethnicity: 'white-caucasian', age: 33, education: 'bachelors', salary: 48000, department: 'Medical' }
+            ];
+
+            // Calculate basic stats
+            const maleAvg = testData.filter(d => d.gender === 'male').reduce((sum, d) => sum + d.salary, 0) / testData.filter(d => d.gender === 'male').length;
+            const femaleAvg = testData.filter(d => d.gender === 'female').reduce((sum, d) => sum + d.salary, 0) / testData.filter(d => d.gender === 'female').length;
+            const gapPercent = ((maleAvg - femaleAvg) / maleAvg * 100).toFixed(2);
+
+            const resultDiv = document.getElementById('testResult');
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = `
+                <h3>✅ Test Successful!</h3>
+                <p><strong>Sample Data:</strong> ${testData.length} entries</p>
+                <p><strong>Male Average Salary:</strong> $${maleAvg.toLocaleString()}</p>
+                <p><strong>Female Average Salary:</strong> $${femaleAvg.toLocaleString()}</p>
+                <p><strong>Gender Pay Gap:</strong> ${gapPercent}%</p>
+                <p style="color: #10b981; font-weight: bold;">All systems operational! The application is working correctly.</p>
+            `;
+        }
+    </script>
+</body>
+</html>

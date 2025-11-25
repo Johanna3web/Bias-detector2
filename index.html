@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PayEquity AI - Workplace Bias Detector</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">
+                <i class="fas fa-balance-scale"></i>
+                <span>PayEquity AI</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#home">Home</a></li>
+                <li><a href="#analyzer">Analyzer</a></li>
+                <li><a href="#insights">Insights</a></li>
+                <li><a href="#reports">Reports</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <section id="home" class="hero">
+        <div class="container">
+            <h1>Detect Workplace Pay Bias with AI</h1>
+            <p>Advanced analytics to identify and eliminate pay discrimination across sectors, countries, and demographics</p>
+            <button class="cta-btn" onclick="scrollToAnalyzer()">Start Analysis</button>
+        </div>
+    </section>
+
+    <section id="analyzer" class="analyzer-section">
+        <div class="container">
+            <h2>Bias Detection Analyzer</h2>
+            
+            <div class="upload-section">
+                <div class="upload-box" id="uploadBox" onclick="document.getElementById('fileInput').click()">
+                    <i class="fas fa-cloud-upload-alt" id="uploadIcon"></i>
+                    <p id="uploadText">Drag & drop your file here or click to browse</p>
+                    <p id="uploadSubtext" style="font-size: 0.9rem; color: var(--gray); margin-top: 0.5rem;">Supports: CSV, JSON, Excel, TXT, Word, PDF, and more</p>
+                    <input type="file" id="fileInput" accept="*" hidden>
+                    <button onclick="event.stopPropagation(); document.getElementById('fileInput').click()" style="margin-top: 1rem;">Choose File</button>
+                    
+                    <!-- Progress indicator -->
+                    <div id="uploadProgress" style="display: none; margin-top: 1.5rem;">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressFill"></div>
+                        </div>
+                        <p id="progressText" style="margin-top: 0.5rem; font-weight: bold;"></p>
+                    </div>
+                </div>
+                
+                <!-- Uploaded File Display and Analyse Button -->
+                <div id="uploadedFileSection" class="uploaded-file-section" style="display: none;">
+                    <div class="uploaded-file-card">
+                        <div class="file-info">
+                            <i class="fas fa-file-alt file-icon"></i>
+                            <div class="file-details">
+                                <h4 id="uploadedFileName">filename.csv</h4>
+                                <p id="uploadedFileInfo">0 entries • 0 KB</p>
+                            </div>
+                            <button class="remove-file-btn" onclick="removeUploadedFile()" title="Remove file">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <button class="analyse-file-btn" onclick="analyseUploadedFile()">
+                            <i class="fas fa-chart-line"></i> Analyse File
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="manual-entry">
+                <h3>Or Enter Data Manually</h3>
+                <form id="dataForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Country</label>
+                            <select id="country" required>
+                                <option value="">Select Country</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Sector</label>
+                            <select id="sector" required>
+                                <option value="">Select Sector</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Job Title</label>
+                            <input type="text" id="jobTitle" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Experience (years)</label>
+                            <input type="number" id="experience" min="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Gender</label>
+                            <select id="gender" required>
+                                <option value="">Select</option>
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                                <option value="non-binary">Non-binary</option>
+                                <option value="prefer-not-to-say">Prefer not to say</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Ethnicity</label>
+                            <select id="ethnicity" required>
+                                <option value="">Select</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Age</label>
+                            <input type="number" id="age" min="18" max="100" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Education Level</label>
+                            <select id="education" required>
+                                <option value="">Select</option>
+                                <option value="high-school">High School</option>
+                                <option value="bachelors">Bachelor's Degree</option>
+                                <option value="masters">Master's Degree</option>
+                                <option value="phd">PhD</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Annual Salary</label>
+                            <input type="number" id="salary" min="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Currency</label>
+                            <select id="currency" required>
+                                <option value="">Select Currency</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Department</label>
+                            <input type="text" id="department" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="submit-btn">Add Entry</button>
+                </form>
+            </div>
+
+            <div id="dataPreview" class="data-preview" style="display: none;">
+                <h3>Data Preview</h3>
+                <div id="previewContent"></div>
+                <button class="analyze-btn" id="analyzeBtn" onclick="runAnalysis()">
+                    <i class="fas fa-chart-line"></i> <span id="analyzeBtnText">Run Bias Analysis</span>
+                </button>
+                
+                <!-- Analysis progress -->
+                <div id="analysisProgress" style="display: none; margin-top: 2rem; text-align: center;">
+                    <div class="spinner"></div>
+                    <p id="analysisProgressText" style="margin-top: 1rem; font-size: 1.1rem; font-weight: bold; color: var(--primary);"></p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="insights" class="insights-section" style="display: none;">
+        <div class="container">
+            <h2>Analysis Results</h2>
+            
+            <div class="bias-score-card">
+                <h3>Overall Bias Score</h3>
+                <div class="score-display" id="overallScore">
+                    <div class="score-circle">
+                        <span id="scoreValue">0</span>
+                        <span class="score-label">/ 100</span>
+                    </div>
+                    <p id="scoreInterpretation"></p>
+                </div>
+            </div>
+
+            <div class="insights-grid">
+                <div class="insight-card">
+                    <h4><i class="fas fa-venus-mars"></i> Gender Pay Gap</h4>
+                    <div id="genderGap"></div>
+                </div>
+                <div class="insight-card">
+                    <h4><i class="fas fa-users"></i> Ethnicity Analysis</h4>
+                    <div id="ethnicityAnalysis"></div>
+                </div>
+                <div class="insight-card">
+                    <h4><i class="fas fa-birthday-cake"></i> Age Discrimination</h4>
+                    <div id="ageAnalysis"></div>
+                </div>
+                <div class="insight-card">
+                    <h4><i class="fas fa-globe"></i> Geographic Disparities</h4>
+                    <div id="geoAnalysis"></div>
+                </div>
+            </div>
+
+            <div class="charts-section">
+                <div class="chart-container">
+                    <canvas id="genderChart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <canvas id="sectorChart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <canvas id="experienceChart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <canvas id="countryChart"></canvas>
+                </div>
+            </div>
+
+            <div class="ml-insights">
+                <h3><i class="fas fa-brain"></i> AI-Powered Insights</h3>
+                <div id="mlInsights"></div>
+            </div>
+
+            <div class="recommendations">
+                <h3><i class="fas fa-lightbulb"></i> Recommendations</h3>
+                <div id="recommendations"></div>
+            </div>
+        </div>
+    </section>
+
+    <section id="reports" class="reports-section">
+        <div class="container">
+            <h2>Generate Reports</h2>
+            <div class="report-options">
+                <button onclick="generatePDF()" class="report-btn">
+                    <i class="fas fa-file-pdf"></i> Download PDF Report
+                </button>
+                <button onclick="exportData()" class="report-btn">
+                    <i class="fas fa-file-excel"></i> Export Data
+                </button>
+                <button onclick="shareReport()" class="report-btn">
+                    <i class="fas fa-share-alt"></i> Share Report
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 PayEquity AI. Fighting workplace discrimination through data.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

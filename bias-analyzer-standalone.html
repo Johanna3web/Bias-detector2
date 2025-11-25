@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bias Detection Analyzer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        pink: {
+                            50: '#fff5f9',
+                            100: '#ffe6f2',
+                            200: '#ffd4e8',
+                            300: '#ffc2de',
+                            400: '#ffaad4',
+                            500: '#ffb3d9',
+                            600: '#ff99cc',
+                            700: '#ff6b9d',
+                            800: '#8b5a6f',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gradient-to-br from-pink-50 to-pink-100 min-h-screen">
+    <!-- Hero -->
+    <div class="bg-gradient-to-r from-pink-500 to-pink-600 text-white py-16 px-4 shadow-lg">
+        <div class="max-w-6xl mx-auto text-center">
+            <h1 class="text-5xl font-bold mb-4">Bias Detection Analyzer</h1>
+            <p class="text-xl opacity-90">Upload your data and instantly detect potential biases</p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-6xl mx-auto px-4 py-8">
+        <!-- Upload Section -->
+        <div class="bg-white rounded-2xl shadow-xl p-8 mb-8">
+            <h2 class="text-2xl font-bold text-pink-800 mb-6">Upload Your Data</h2>
+            
+            <div id="uploadBox" class="border-4 border-dashed border-pink-300 rounded-xl p-12 text-center cursor-pointer hover:border-pink-400 hover:bg-pink-50 transition-all">
+                <input type="file" id="fileInput" class="hidden" accept=".csv,.xlsx,.xls,.json,.txt">
+                <svg class="mx-auto h-16 w-16 text-pink-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                </svg>
+                <p class="text-xl font-semibold text-gray-700 mb-2">Drag & drop your file here</p>
+                <p class="text-gray-500 mb-4">or click to browse</p>
+                <button class="bg-pink-500 hover:bg-pink-600 text-white font-bold py-3 px-8 rounded-lg transition-all">
+                    Choose File
+                </button>
+            </div>
+
+            <div class="mt-6 text-center">
+                <p class="text-sm text-gray-600 mb-2">Supported file types:</p>
+                <div class="flex flex-wrap justify-center gap-2">
+                    <span class="bg-pink-100 text-pink-700 px-3 py-1 rounded-full text-xs font-semibold">CSV</span>
+                    <span class="bg-pink-100 text-pink-700 px-3 py-1 rounded-full text-xs font-semibold">XLSX</span>
+                    <span class="bg-pink-100 text-pink-700 px-3 py-1 rounded-full text-xs font-semibold">JSON</span>
+                    <span class="bg-pink-100 text-pink-700 px-3 py-1 rounded-full text-xs font-semibold">TXT</span>
+                </div>
+            </div>
+
+            <div id="uploadMessage" class="mt-6 hidden"></div>
+        </div>
+
+        <!-- Preview Section -->
+        <div id="previewSection" class="bg-white rounded-2xl shadow-xl p-8 mb-8 hidden">
+            <div class="flex items-center justify-between mb-6 pb-6 border-b-2 border-pink-100">
+                <div class="flex items-center space-x-4">
+                    <div class="bg-pink-100 p-4 rounded-lg">
+                        <svg class="h-8 w-8 text-pink-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 id="fileName" class="text-xl font-bold text-gray-800"></h3>
+                        <p id="fileInfo" class="text-sm text-gray-500"></p>
+                    </div>
+                </div>
+                <button onclick="clearFile()" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded-lg transition-all">
+                    Clear File
+                </button>
+            </div>
+            <h4 class="text-lg font-bold text-pink-800 mb-4">File Preview</h4>
+            <div id="previewContent" class="overflow-x-auto"></div>
+        </div>
+
+        <!-- Analysis Section -->
+        <div id="analysisSection" class="bg-white rounded-2xl shadow-xl p-8 hidden">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl font-bold text-pink-800">Bias Analysis</h2>
+                <button id="analyzeBtn" onclick="runAnalysis()" class="bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 text-white font-bold py-3 px-8 rounded-xl transition-all">
+                    🔍 Analyze for Bias
+                </button>
+            </div>
+            <div id="analysisResults"></div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-pink-800 text-white py-6 mt-16">
+        <div class="max-w-6xl mx-auto px-4 text-center">
+            <p>&copy; 2025 Bias Detection Analyzer. Fighting discrimination through data.</p>
+        </div>
+    </footer>
+
+    <script>
+        let uploadedData = null;
+        let uploadedFile = null;
+
+        // Setup drag and drop
+        const uploadBox = document.getElementById('uploadBox');
+        const fileInput = document.getElementById('fileInput');
+
+        uploadBox.addEventListener('click', () => fileInput.click());
+        uploadBox.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadBox.classList.add('border-pink-500', 'bg-pink-50', 'scale-105');
+        });
+        uploadBox.addEventListener('dragleave', () => {
+            uploadBox.classList.remove('border-pink-500', 'bg-pink-50', 'scale-105');
+        });
+        uploadBox.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadBox.classList.remove('border-pink-500', 'bg-pink-50', 'scale-105');
+            if (e.dataTransfer.files.length > 0) {
+                handleFile(e.dataTransfer.files[0]);
+            }
+        });
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        function handleFile(file) {
+            uploadedFile = file;
+            const fileType = file.name.split('.').pop().toLowerCase();
+            
+            showMessage('Processing file...', 'info');
+
+            if (fileType === 'csv') {
+                parseCSV(file);
+            } else if (fileType === 'xlsx' || fileType === 'xls') {
+                parseExcel(file);
+            } else if (fileType === 'json') {
+                parseJSON(file);
+            } else if (fileType === 'txt') {
+                parseTXT(file);
+            } else {
+                showMessage('Unsupported file type', 'error');
+            }
+        }
+
+        function parseCSV(file) {
+            Papa.parse(file, {
+                header: true,
+                skipEmptyLines: true,
+                complete: (results) => {
+                    uploadedData = results.data;
+                    showPreview(file, uploadedData, 'csv');
+                    showMessage('File uploaded successfully!', 'success');
+                },
+                error: () => showMessage('Error parsing CSV file', 'error')
+            });
+        }
+
+        function parseExcel(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    uploadedData = XLSX.utils.sheet_to_json(firstSheet);
+                    showPreview(file, uploadedData, 'excel');
+                    showMessage('File uploaded successfully!', 'success');
+                } catch (error) {
+                    showMessage('Error parsing Excel file', 'error');
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function parseJSON(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    uploadedData = JSON.parse(e.target.result);
+                    if (!Array.isArray(uploadedData)) uploadedData = [uploadedData];
+                    showPreview(file, uploadedData, 'json');
+                    showMessage('File uploaded successfully!', 'success');
+                } catch (error) {
+                    showMessage('Error parsing JSON file', 'error');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function parseTXT(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const lines = e.target.result.split('\n').filter(l => l.trim());
+                uploadedData = lines;
+                showPreview(file, lines, 'txt');
+                showMessage('File uploaded successfully!', 'success');
+            };
+            reader.readAsText(file);
+        }
+
+        function showPreview(file, data, type) {
+            document.getElementById('fileName').textContent = file.name;
+            document.getElementById('fileInfo').textContent = `${formatFileSize(file.size)} • ${type.toUpperCase()} • ${data.length} rows`;
+            
+            const previewContent = document.getElementById('previewContent');
+            
+            if (type === 'csv' || type === 'excel' || type === 'json') {
+                const preview = data.slice(0, 10);
+                const columns = Object.keys(preview[0] || {});
+                
+                let html = '<table class="min-w-full divide-y divide-pink-200"><thead class="bg-pink-100"><tr>';
+                columns.forEach(col => {
+                    html += `<th class="px-6 py-3 text-left text-xs font-bold text-pink-800 uppercase">${col}</th>`;
+                });
+                html += '</tr></thead><tbody class="bg-white divide-y divide-pink-100">';
+                
+                preview.forEach(row => {
+                    html += '<tr class="hover:bg-pink-50">';
+                    columns.forEach(col => {
+                        html += `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">${row[col] || '-'}</td>`;
+                    });
+                    html += '</tr>';
+                });
+                
+                html += '</tbody></table>';
+                if (data.length > 10) {
+                    html += `<p class="text-sm text-gray-500 mt-4 text-center">Showing 10 of ${data.length} rows</p>`;
+                }
+                previewContent.innerHTML = html;
+            } else {
+                const preview = data.slice(0, 20);
+                let html = '<div class="bg-gray-50 p-4 rounded-lg">';
+                preview.forEach(line => {
+                    html += `<p class="text-sm text-gray-700 mb-1">${line}</p>`;
+                });
+                html += '</div>';
+                previewContent.innerHTML = html;
+            }
+            
+            document.getElementById('previewSection').classList.remove('hidden');
+            document.getElementById('analysisSection').classList.remove('hidden');
+        }
+
+        function runAnalysis() {
+            if (!uploadedData || uploadedData.length === 0) {
+                showMessage('No data to analyze', 'error');
+                return;
+            }
+
+            const results = calculateBias(uploadedData);
+            displayResults(results);
+        }
+
+        function calculateBias(data) {
+            const results = {
+                summary: {},
+                genderBias: null,
+                raceBias: null,
+                overallScore: 0
+            };
+
+            // Find numeric columns
+            const numericCols = Object.keys(data[0] || {}).filter(key => {
+                return !isNaN(parseFloat(data[0][key]));
+            });
+
+            // Summary stats
+            numericCols.forEach(col => {
+                const values = data.map(row => parseFloat(row[col])).filter(v => !isNaN(v));
+                if (values.length > 0) {
+                    results.summary[col] = {
+                        min: Math.min(...values),
+                        max: Math.max(...values),
+                        mean: values.reduce((a, b) => a + b, 0) / values.length,
+                        median: values.sort((a, b) => a - b)[Math.floor(values.length / 2)]
+                    };
+                }
+            });
+
+            // Gender bias
+            const genderCol = Object.keys(data[0] || {}).find(k => k.toLowerCase().includes('gender') || k.toLowerCase().includes('sex'));
+            if (genderCol && numericCols.length > 0) {
+                results.genderBias = analyzeGroup(data, genderCol, numericCols[0]);
+            }
+
+            // Race bias
+            const raceCol = Object.keys(data[0] || {}).find(k => k.toLowerCase().includes('race') || k.toLowerCase().includes('ethnic'));
+            if (raceCol && numericCols.length > 0) {
+                results.raceBias = analyzeGroup(data, raceCol, numericCols[0]);
+            }
+
+            // Overall score
+            let score = 0;
+            if (results.genderBias) score += parseFloat(results.genderBias.disparity);
+            if (results.raceBias) score += parseFloat(results.raceBias.disparity);
+            results.overallScore = Math.min(100, Math.round(score / 2));
+
+            return results;
+        }
+
+        function analyzeGroup(data, groupCol, valueCol) {
+            const groups = {};
+            data.forEach(row => {
+                const group = row[groupCol];
+                const value = parseFloat(row[valueCol]);
+                if (group && !isNaN(value)) {
+                    if (!groups[group]) groups[group] = [];
+                    groups[group].push(value);
+                }
+            });
+
+            const stats = {};
+            let maxAvg = 0, minAvg = Infinity;
+            
+            Object.keys(groups).forEach(group => {
+                const avg = groups[group].reduce((a, b) => a + b, 0) / groups[group].length;
+                stats[group] = { average: avg, count: groups[group].length };
+                maxAvg = Math.max(maxAvg, avg);
+                minAvg = Math.min(minAvg, avg);
+            });
+
+            const disparity = maxAvg > 0 ? ((maxAvg - minAvg) / maxAvg * 100).toFixed(2) : 0;
+
+            return {
+                column: valueCol,
+                groups: stats,
+                disparity: disparity,
+                hasBias: disparity > 10
+            };
+        }
+
+        function displayResults(results) {
+            let html = '';
+
+            // Overall Score
+            const score = results.overallScore;
+            const status = score < 20 ? 'Excellent' : score < 50 ? 'Moderate' : 'Critical';
+            const bgColor = score < 20 ? 'bg-green-100' : score < 50 ? 'bg-yellow-100' : 'bg-red-100';
+            const textColor = score < 20 ? 'text-green-700' : score < 50 ? 'text-yellow-700' : 'text-red-700';
+
+            html += `<div class="${bgColor} rounded-xl p-8 mb-8 text-center">
+                <h3 class="text-2xl font-bold text-gray-800 mb-4">Overall Bias Score</h3>
+                <div class="flex items-center justify-center space-x-4">
+                    <div class="text-6xl font-bold text-pink-600">${score}</div>
+                    <div class="text-left">
+                        <p class="text-gray-600">out of 100</p>
+                        <p class="text-xl font-bold ${textColor}">${status}</p>
+                    </div>
+                </div>
+            </div>`;
+
+            // Summary Stats
+            html += '<h3 class="text-xl font-bold text-pink-800 mb-4">Summary Statistics</h3>';
+            html += '<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">';
+            Object.entries(results.summary).forEach(([col, stats]) => {
+                html += `<div class="bg-pink-50 rounded-lg p-4 border-2 border-pink-200">
+                    <h4 class="font-bold text-pink-800 mb-3">${col}</h4>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between"><span class="text-gray-600">Min:</span><span class="font-semibold">${stats.min.toFixed(2)}</span></div>
+                        <div class="flex justify-between"><span class="text-gray-600">Max:</span><span class="font-semibold">${stats.max.toFixed(2)}</span></div>
+                        <div class="flex justify-between"><span class="text-gray-600">Mean:</span><span class="font-semibold">${stats.mean.toFixed(2)}</span></div>
+                        <div class="flex justify-between"><span class="text-gray-600">Median:</span><span class="font-semibold">${stats.median.toFixed(2)}</span></div>
+                    </div>
+                </div>`;
+            });
+            html += '</div>';
+
+            // Gender Bias
+            if (results.genderBias) {
+                const badge = results.genderBias.hasBias ? 
+                    '<span class="px-4 py-2 rounded-full text-sm font-bold bg-red-100 text-red-700">⚠️ Bias Detected</span>' :
+                    '<span class="px-4 py-2 rounded-full text-sm font-bold bg-green-100 text-green-700">✓ No Significant Bias</span>';
+                
+                html += `<div class="mb-8">
+                    <h3 class="text-xl font-bold text-pink-800 mb-4">Gender Bias Analysis</h3>
+                    <div class="bg-white rounded-lg p-6 border-2 border-pink-200">
+                        <div class="flex items-center justify-between mb-4">
+                            <h4 class="font-bold text-gray-800">${results.genderBias.column}</h4>
+                            ${badge}
+                        </div>
+                        <p class="text-gray-600 mb-4">Disparity: <span class="font-bold">${results.genderBias.disparity}%</span></p>
+                        <div class="space-y-2">`;
+                
+                Object.entries(results.genderBias.groups).forEach(([group, stats]) => {
+                    html += `<div class="flex justify-between items-center bg-pink-50 p-3 rounded">
+                        <span class="font-semibold">${group}</span>
+                        <span class="text-pink-600 font-bold">${stats.average.toFixed(2)}</span>
+                    </div>`;
+                });
+                
+                html += `</div></div></div>`;
+            }
+
+            // Race Bias
+            if (results.raceBias) {
+                const badge = results.raceBias.hasBias ? 
+                    '<span class="px-4 py-2 rounded-full text-sm font-bold bg-red-100 text-red-700">⚠️ Bias Detected</span>' :
+                    '<span class="px-4 py-2 rounded-full text-sm font-bold bg-green-100 text-green-700">✓ No Significant Bias</span>';
+                
+                html += `<div class="mb-8">
+                    <h3 class="text-xl font-bold text-pink-800 mb-4">Race/Ethnicity Bias Analysis</h3>
+                    <div class="bg-white rounded-lg p-6 border-2 border-pink-200">
+                        <div class="flex items-center justify-between mb-4">
+                            <h4 class="font-bold text-gray-800">${results.raceBias.column}</h4>
+                            ${badge}
+                        </div>
+                        <p class="text-gray-600 mb-4">Disparity: <span class="font-bold">${results.raceBias.disparity}%</span></p>
+                        <div class="space-y-2">`;
+                
+                Object.entries(results.raceBias.groups).forEach(([group, stats]) => {
+                    html += `<div class="flex justify-between items-center bg-pink-50 p-3 rounded">
+                        <span class="font-semibold">${group}</span>
+                        <span class="text-pink-600 font-bold">${stats.average.toFixed(2)}</span>
+                    </div>`;
+                });
+                
+                html += `</div></div></div>`;
+            }
+
+            document.getElementById('analysisResults').innerHTML = html;
+        }
+
+        function clearFile() {
+            uploadedData = null;
+            uploadedFile = null;
+            fileInput.value = '';
+            document.getElementById('previewSection').classList.add('hidden');
+            document.getElementById('analysisSection').classList.add('hidden');
+            document.getElementById('analysisResults').innerHTML = '';
+            showMessage('File cleared', 'info');
+        }
+
+        function showMessage(message, type) {
+            const messageDiv = document.getElementById('uploadMessage');
+            const colors = {
+                success: 'bg-green-50 border-green-500 text-green-700',
+                error: 'bg-red-50 border-red-500 text-red-700',
+                info: 'bg-blue-50 border-blue-500 text-blue-700'
+            };
+            
+            messageDiv.className = `mt-6 border-l-4 p-4 rounded ${colors[type]}`;
+            messageDiv.innerHTML = `<p class="font-semibold">${message}</p>`;
+            messageDiv.classList.remove('hidden');
+            
+            setTimeout(() => messageDiv.classList.add('hidden'), 3000);
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JavaScript Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            text-align: center;
+        }
+        .box {
+            padding: 30px;
+            margin: 20px 0;
+            border-radius: 10px;
+        }
+        .error {
+            background: #fee;
+            border: 2px solid #f00;
+            color: #c00;
+        }
+        .success {
+            background: #efe;
+            border: 2px solid #0f0;
+            color: #060;
+        }
+        button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        button:hover {
+            background: #1d4ed8;
+        }
+    </style>
+</head>
+<body>
+    <h1>JavaScript Test Page</h1>
+    
+    <noscript>
+        <div class="box error">
+            <h2>⚠️ JavaScript is Disabled!</h2>
+            <p><strong>This application requires JavaScript to function.</strong></p>
+            <h3>How to Enable JavaScript:</h3>
+            <div style="text-align: left; max-width: 500px; margin: 20px auto;">
+                <h4>Chrome:</h4>
+                <ol>
+                    <li>Click the three dots (⋮) in the top right</li>
+                    <li>Go to Settings → Privacy and security → Site settings</li>
+                    <li>Click JavaScript</li>
+                    <li>Select "Sites can use Javascript"</li>
+                </ol>
+                
+                <h4>Firefox:</h4>
+                <ol>
+                    <li>Type "about:config" in the address bar</li>
+                    <li>Search for "javascript.enabled"</li>
+                    <li>Set it to "true"</li>
+                </ol>
+                
+                <h4>Edge:</h4>
+                <ol>
+                    <li>Click the three dots (...) in the top right</li>
+                    <li>Go to Settings → Cookies and site permissions</li>
+                    <li>Click JavaScript</li>
+                    <li>Turn on "Allowed"</li>
+                </ol>
+                
+                <h4>Safari:</h4>
+                <ol>
+                    <li>Go to Safari → Preferences</li>
+                    <li>Click Security tab</li>
+                    <li>Check "Enable JavaScript"</li>
+                </ol>
+            </div>
+        </div>
+    </noscript>
+    
+    <div id="jsEnabled" style="display: none;">
+        <div class="box success">
+            <h2>✅ JavaScript is Working!</h2>
+            <p>Your browser supports JavaScript and it's enabled.</p>
+        </div>
+        
+        <button onclick="testBasicFunction()">Test Basic Function</button>
+        <button onclick="window.location.href='index.html'">Open PayEquity AI</button>
+        
+        <div id="testResult" style="margin-top: 20px;"></div>
+    </div>
+
+    <script>
+        // Show that JS is enabled
+        document.getElementById('jsEnabled').style.display = 'block';
+        
+        function testBasicFunction() {
+            const result = document.getElementById('testResult');
+            result.innerHTML = `
+                <div class="box success">
+                    <h3>✅ Test Successful!</h3>
+                    <p>JavaScript is working correctly.</p>
+                    <p>Current time: ${new Date().toLocaleString()}</p>
+                    <p><strong>You can now use the PayEquity AI application!</strong></p>
+                </div>
+            `;
+        }
+        
+        // Auto-test on load
+        console.log('JavaScript is enabled and working!');
+    </script>
+</body>
+</html>
